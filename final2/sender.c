@@ -5,7 +5,7 @@
 #include <mqueue.h>
 #include <pthread.h>
 
-void* Receiver(void *arg){ //Se usa la seungda cola para que se reciba el mensaje usando el segundo hilo 
+void* Receiver(void *arg){ 
     mqd_t mq1 = mq_open("/mq1",O_RDONLY);
 
     char buff[64];
@@ -24,7 +24,7 @@ void* Receiver(void *arg){ //Se usa la seungda cola para que se reciba el mensaj
 
 }
 
-int main(int argc, char* argv[]){ //Envia el mensaje 
+int main(int argc, char* argv[]){ 
     mqd_t mq = mq_open("/mq0", O_WRONLY);
     char str[64];
     pthread_t threadID1;
