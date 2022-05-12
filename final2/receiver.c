@@ -5,7 +5,7 @@
 #include <mqueue.h>
 #include <pthread.h>
 
-void* Send(void *arg)//hilo que se encarga de crear la cola para que el pueda enviar los mensajes
+void* Sender(void *arg)//Hilo. Crea la cola para que el pueda enviar el mensaje 
 {
     mqd_t mq1;
 
@@ -34,7 +34,7 @@ void* Send(void *arg)//hilo que se encarga de crear la cola para que el pueda en
     exit(EXIT_FAILURE);
 }
 
-int main(int argc, char *argv[])//se encarga de recibir todos los mensajes y aparte de crear la cola
+int main(int argc, char *argv[])//Recibe los mensajes. Crea la cola 
 {
     mqd_t mq;
     mqd_t mq1;
@@ -51,50 +51,50 @@ int main(int argc, char *argv[])//se encarga de recibir todos los mensajes y apa
     char buff[32];
 
     pthread_t threadID1;
-    pthread_create(&threadID1,NULL,&Send,NULL);
+    pthread_create(&threadID1,NULL,&Sender,NULL);
 
     while (1)
     {
         mq_receive(mq, buff, 64, NULL);
-        printf("Sender Message: %s\n", buff);
+        printf("sent: %s\n", buff);
 
-        char* token2 = malloc(100);
-        strcpy(token2, buff); //Se copia el contenido de buff en un puntero al que luego se le cambia el contenido
-        //Se separan los parámetros con un "#" intermedio (Ejemplo: archivo.txt#UpDown)
-        char *token1 = strsep(&token2,"#"); //Tras hacer el strsep() el contenido de lo que había en el buff (que se guardó en token2) pasa a ser el del token siguiente al guardado en token1 
-        //token1 contiene la información de la ruta (archivo.txt)
-        //token2 contiene el parámetro para el orden del archivo (UpDown) (DownUp)
+        char* param1 = malloc(100);
+        strcpy(param1, buff); //El contenido de buff es copiado en un puntero para que pueda ser modificado su contenido.
+        //Se usa el $ para usar los procesamientos above o below 
+        char *param0 = strsep(&param1,"$"); //Tras hacer el strsep() el contenido de lo que había en el buff (que se guardó en param1) pasa a ser el del token siguiente al guardado en param0 
+        //param0 contiene la información de la ruta (f1.txt)
+        //param1 contiene el parámetro para el orden del archivo que puede ser (above) o (below)
         
         FILE *file;
-        file = fopen(token1, "r");        
+        file = fopen(param0, "r");        
 
-        char * fileContent = malloc(100);
+        char * Content = malloc(100);
 
-        if (strcmp(token2, "UpDown") == 0)
+        if (strcmp(param1, "above") == 0)
         {
-            while (fgets(fileContent, 100, file) != NULL)
+            while (fgets(Content, 100, file) != NULL)
             {
-                if(fileContent[strlen(fileContent) - 1 ] == '\n') fileContent[strlen(fileContent) - 1 ] = 0;
-                printf("Enviado al Sender: %s\n",fileContent);
-                mq_send(mq1, fileContent, strlen(fileContent)+1, 0);
+                if(Content[strlen(Content) - 1 ] == '\n') Content[strlen(Content) - 1 ] = 0;
+                printf("Sent: %s\n",Content);
+                mq_send(mq1, Content, strlen(Content)+1, 0);
             }  
         }
-        else if (strcmp(token2, "DownUp") == 0)
+        else if (strcmp(param1, "below") == 0)
         {            
             int counter = 0;            
-            char inverseContent[counter][100];
+            char InverseContent[counter][100];
             
-            while (fgets(fileContent, 100, file) != NULL)
+            while (fgets(Content, 100, file) != NULL)
             {
-                if(fileContent[strlen(fileContent) - 1 ] == '\n') fileContent[strlen(fileContent) - 1 ] = 0;
-                strcpy(inverseContent[counter], fileContent);                
+                if(Content[strlen(Content) - 1 ] == '\n') Content[strlen(Content) - 1 ] = 0;
+                strcpy(InverseContent[counter], Content);                
                 counter++;
             }
             for (size_t i = 0; i <= counter ; i++)
             {
-                if(strcmp(inverseContent[counter-i], "") == 0) break;
-                printf("Enviado al Sender: %s\n",inverseContent[counter-i]);
-                mq_send(mq1, inverseContent[counter-i], strlen(inverseContent[counter-i])+1, 0);
+                if(strcmp(InverseContent[counter-i], "") == 0) break;
+                printf("Enviado al Sender: %s\n",InverseContent[counter-i]);
+                mq_send(mq1, InverseContent[counter-i], strlen(InverseContent[counter-i])+1, 0);
             }            
         }     
                 
