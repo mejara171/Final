@@ -5,7 +5,7 @@
 #include <mqueue.h>
 #include <pthread.h>
 
-void* Sender(void *arg)//Hilo. Crea la cola para que el pueda enviar el mensaje 
+void* Sender(void *arg)
 {
     mqd_t mq1;
 
@@ -34,7 +34,7 @@ void* Sender(void *arg)//Hilo. Crea la cola para que el pueda enviar el mensaje
     exit(EXIT_FAILURE);
 }
 
-int main(int argc, char *argv[])//Recibe los mensajes. Crea la cola 
+int main(int argc, char *argv[])
 {
     mqd_t mq;
     mqd_t mq1;
@@ -59,11 +59,9 @@ int main(int argc, char *argv[])//Recibe los mensajes. Crea la cola
         printf("sent: %s\n", buff);
 
         char* param1 = malloc(100);
-        strcpy(param1, buff); //El contenido de buff es copiado en un puntero para que pueda ser modificado su contenido.
-        //Se usa el $ para usar los procesamientos above o below 
-        char *param0 = strsep(&param1,"$"); //Tras hacer el strsep() el contenido de lo que había en el buff (que se guardó en param1) pasa a ser el del token siguiente al guardado en param0 
-        //param0 contiene la información de la ruta (f1.txt)
-        //param1 contiene el parámetro para el orden del archivo que puede ser (above) o (below)
+        strcpy(param1, buff); 
+        char *param0 = strsep(&param1,"$"); 
+
         
         FILE *file;
         file = fopen(param0, "r");        
